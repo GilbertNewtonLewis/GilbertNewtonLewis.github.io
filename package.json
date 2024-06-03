@@ -1,0 +1,25 @@
+{
+  "name": "hexo-site",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "sudo npx hexo clean",
+    "s": "sudo npx hexo clean && npx hexo g && npx hexo s",
+    "d": "sudo npx hexo clean && npx hexo g && npx hexo d && git add . && git commit -m 'update code' && git push -u origin code"
+  },
+  "hexo": {
+    "version": "7.2.0"
+  },
+  "dependencies": {
+    "hexo": "^7.0.0",
+    "hexo-generator-archive": "^2.0.0",
+    "hexo-generator-category": "^2.0.0",
+    "hexo-generator-index": "^3.0.0",
+    "hexo-generator-tag": "^2.0.0",
+    "hexo-renderer-ejs": "^2.0.0",
+    "hexo-renderer-marked": "^6.0.0",
+    "hexo-renderer-stylus": "^3.0.0",
+    "hexo-server": "^3.0.0",
+    "hexo-theme-landscape": "^1.0.0"
+  }
+}
