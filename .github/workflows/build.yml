@@ -1,0 +1,53 @@
+# Code 分支推送部署预览
+## TODO 目前仅在 Linux 上部署，暂未做 Windows 适配
+name: Build Code
+
+on:
+  push:
+    branches:
+      - code
+
+jobs:
+  release:
+    name: Build Website
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 检出 Git 仓库
+      - name: Check out git repository
+        uses: actions/checkout@v4.1.1
+
+      # 安装 Node.js
+      - name: Install Node.js
+        uses: actions/setup-node@v4.0.0
+        with:
+          node-version: "18.x"
+
+      # 安装项目依赖
+      - name: Install Dependencies
+        run: npm install
+
+      # 构建程序
+      - name: Build Website
+        run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      # 上传构建产物
+      - name: Upload artifacts
+        # 链接 https://github.com/actions/upload-artifact/
+        uses: actions/upload-artifact@v4.3.0
+        with:
+          name: Blog
+          path: public
+
+      # 部署到 master 分支
+      - name: Deploy to master
+        # 链接 https://github.com/crazy-max/ghaction-github-pages/
+        uses: crazy-max/ghaction-github-pages@v4.0.0
+        with:
+          target_branch: main
+          build_dir: public
+          keep_history: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
