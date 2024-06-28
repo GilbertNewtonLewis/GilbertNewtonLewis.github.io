@@ -1,5 +1,5 @@
 # Code 分支推送部署预览
-## TODO 目前仅在 Linux 上部署，暂未做 Windows 适配
+## 已做好 Windows 和 Linux 跨平台适配，但是 CI 还是选择在 Linux 上跑
 name: Build Code
 
 on:
