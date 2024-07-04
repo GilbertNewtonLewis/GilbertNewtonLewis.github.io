@@ -46,6 +46,9 @@ $(document).ready(function () {
         if (delta > 0) {
           $headerNav.removeClass('slider--down')
           $headerNav.addClass('slider--up')
+        } else {
+          $headerNav.removeClass('slider--up')
+          $headerNav.addClass('slider--down')
         }
       } else {
         $headerNav.addClass('header-nav--sticky')
