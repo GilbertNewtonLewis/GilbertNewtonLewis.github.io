@@ -1,5 +1,7 @@
 ---
 title: My 1st post
+date: 2024-06-21 18:00:00
+updated: 2024-06-21 18:00:00
 ---
 
 <meta name="referrer" content="no-referrer"/>
