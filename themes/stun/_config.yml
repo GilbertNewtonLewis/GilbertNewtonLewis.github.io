@@ -866,7 +866,9 @@ kill_old_ie:
 css: css
 # In theme/hexo directory (source/css/custom.css)
 # Allow user to override css.
-css_custom: css/custom.css
+# Do not use custom css by default
+# css_custom: css/custom.css
+css_custom:
 # In theme directory (source/js)
 js: js
 # In theme directory (source/images)
@@ -907,6 +909,7 @@ icon:
 # ! -------------------------------------------------------------------
 # ! Do not edit the follow configs, unless you know what you are doing.
 # ! -------------------------------------------------------------------
+# All cdn resources are locally stored, in which case the site is quicker to load.
 cdn:
   # Using version: 5.12.1
   # See: https://fontawesome.com/
@@ -915,13 +918,13 @@ cdn:
   # fontawesome: //cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css
   # fontawesome: //cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css
   # fontawesome: //cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css
-  fontawesome:
+  fontawesome: /third-party/css/fontawesome.css
 
   # Using version: 3.4.1
   # Example:
   # jquery: //cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js
   # jquery: //cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js
-  jquery:
+  jquery: /third-party/js/jquery.js
 
   # Using version: 1.5.2
   # See: http://velocityjs.org/
@@ -930,8 +933,8 @@ cdn:
   # velocity: //cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.min.js
   # velocity_ui: //cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js
   # velocity_ui: //cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.ui.min.js
-  velocity:
-  velocity_ui:
+  velocity: /third-party/js/velocity.js
+  velocity_ui: /third-party/js/velocity-ui.js
 
   # gitalk & js-md5
   # Using version: latest & latest
@@ -940,9 +943,9 @@ cdn:
   # gitalk_js: //cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js
   # gitalk_css: //cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.css
   # md5: //cdn.jsdelivr.net/npm/js-md5@latest/src/md5.min.js
-  gitalk_js:
-  gitalk_css:
-  gitalk_md5:
+  gitalk_js: /third-party/js/gitalk.js
+  gitalk_css: /third-party/css/gitalk.css
+  gitalk_md5: /third-party/js/gitalk-md5.js
 
   # valine & leancloud-storage
   # Using version: latest & latest
@@ -950,84 +953,84 @@ cdn:
   # Example:
   # valine: //cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js
   # leancloud_storage: //cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js
-  valine:
-  leancloud_storage:
+  valine: /third-party/js/valine.js
+  leancloud_storage: /third-party/js/leancloud-storage.js
 
   # Waline
   # See: https://github.com/lizheming/waline
   # Example:
-  # waline: //unpkg.com/@waline/client@0.8.5/dist/Waline.min.js
-  waline:
+  # waline: //unpkg.com/@waline/client@3.3.0/dist/waline.js
+  waline: /third-party/js/waline.js
 
   # minivaline
   # See: https://github.com/MiniValine/MiniValine
   # Example:
   # minivaline: //cdn.jsdelivr.net/npm/minivaline/dist/MiniValine.min.js
-  minivaline:
+  minivaline: /third-party/js/minivaline.js
 
   # busuanzi
   # Using version: latest
   # See: https://busuanzi.ibruce.info/
   # Example:
   # busuanzi: //cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js
-  busuanzi:
+  busuanzi: /third-party/js/busuanzi.js
 
   # Using version: 2.1.1
   # See: https://busuanzi.ibruce.info/
   # Example:
   # instantsearch_js: //cdn.jsdelivr.net/npm/instantsearch.js@2.1.1/dist/instantsearch.min.js
   # instantsearch_css: //cdn.jsdelivr.net/npm/instantsearch.js@2.1.1/dist/instantsearch.min.css
-  instantsearch_js:
-  instantsearch_css:
+  instantsearch_js: /third-party/js/instantsearch.js
+  instantsearch_css: /third-party/css/instantsearch.css
 
   # Using version: latest
   # See: https://github.com/hustcc/ribbon.js
   # Example:
   # canvas_ribbon: //cdn.jsdelivr.net/npm/ribbon.js@latest/dist/ribbon.min.js
-  canvas_ribbon:
+  canvas_ribbon: /third-party/js/canvas-ribbon.js
 
   # Using version: latest
   # See: https://github.com/hustcc/canvas-nest.js
   # Example:
   # canvas_nest: //cdn.jsdelivr.net/npm/canvas-nest.js@1.0.1/dist/canvas-nest.min.js
-  canvas_nest:
+  canvas_nest: /third-party/js/canvas-nest.js
 
   # Using version: 3.5.7
   # See: https://www.fancyapps.com/fancybox/3/
   # Example:
   # fancybox_js: //cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js
   # fancybox_css: //cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css
-  fancybox_js:
-  fancybox_css:
+  fancybox_js: /third-party/js/fancybox.js
+  fancybox_css: /third-party/css/fancybox.css
 
   # Using version: 4.2.2
   # See: https://masonry.desandro.com/
   # Example:
   # masonry: //cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js
-  masonry:
+  masonry: /third-party/js/masonry.js
 
   # Using version: 2.0.0-rc.2
   # See: https://github.com/tuupola/lazyload/
   # Example:
   # lazyload: //cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js
-  lazyload:
+  lazyload: /third-party/js/lazyload.js
 
   # Using version: latest
   # See: https://github.com/GoogleChromeLabs/quicklink/
   # Example:
   # quicklink: //cdn.jsdelivr.net/npm/quicklink@latest/dist/quicklink.umd.js
-  quicklink:
+  quicklink: /third-party/js/quicklink.js
 
   # Using version: latest
   # See: https://github.com/MoOx/pjax/
   # Example:
   # pjax: //cdn.jsdelivr.net/npm/pjax@latest/pjax.min.js
-  pjax:
+  pjax: /third-party/js/pjax.js
 
   # Using version: 1.0.16
   # See: https://github.com/overtrue/share.js
   # Example:
   # share_js: //cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js
   # share_css: //cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css
-  share_js:
-  share_css:
+  share_js: /third-party/js/share.js
+  share_css: /third-party/css/share.css

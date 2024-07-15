@@ -76,7 +76,8 @@ if theme.canonical
 if theme.feed.rss
   link(rel="alternate" href=url_for(theme.feed.rss) type="application/atom+xml")
 
-link(rel="dns-prefetch" href="https://cdn.jsdelivr.net")
+//- 已经将所有 cdn 替换为本地资源，因此提前解析和缓存此域名的操作可以去掉
+//- link(rel="dns-prefetch" href="https://cdn.jsdelivr.net")
 
 - var fontawesome_css = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css';
 - if (theme.cdn.fontawesome) fontawesome_css = theme.cdn.fontawesome;
