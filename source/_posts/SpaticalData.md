@@ -58,7 +58,278 @@ nodes数组与index参数用于保存二叉树的信息，如何保存二叉树�
 
 ## 4.2 BSP与Grid
 
-“轴向划分最终得到的空间数据结构与网格无异”，
+写到这里，肯定有读者想发弹幕了，“前面不是刚说过，‘BSP轴向划分最终得到的空间数据结构与网格无异’，那为啥要费劲巴拉的来生成BSP呢？”
+
+是挺费劲巴拉的哈，毕竟这是把我走过的弯路带你们又走了一遍&#x1F436;&#x1F436;。你们一定要相信我，我绝对没有在实现自己的空间数据结构的时候在QT的影响下先实现了一个轴向BSP，然后恍然大悟改成实现网格的&#x1F436;&#x1F436;。当然了，我们这些小辈再走多少路都不如大佬们过的桥多，学无止境呐。
+
+下面将会先后展示BSP与Grid的实现思路以及关键部分的代码/伪代码。
+
+### 4.2.1 BSP
+
+#### 4.2.1.1 数据结构、数据成员
+
+BSP的数据结构为Node所串联成的二叉树。Node的结构如下：
+
+```cpp
+/**
+ * @enum SplitType
+ * @brief 枚举区域分割的类型。
+ */
+enum SplitType
+{
+    Horizontal = 0, ///< 水平分割
+    Vertical,       ///< 竖直分割
+    Leaf            ///< 叶子节点
+};
+/**
+ * @class Node
+ * @brief 树的节点，对应分割形成的某块区域。
+ */
+struct Node
+{
+
+    /**
+     * @brief 默认构造。
+     */
+    Node() = default;
+    /**
+     * @brief 析构函数，处理本节点以及子节点的释放。
+     */
+    ~Node();
+    /**
+     * @brief 该节点的分割类型。
+     */
+    SplitType m_splitType;
+    /**
+     * @details offset 和 leafIndex 分别对应非叶子节点和叶子节点的数据信息，对于同一个节点这两条数据不可能共存。因此为了节省内存，采用 union
+     */
+    union
+    {
+        /**
+         * @brief 分割线的横坐标或纵坐标的偏移量，是横坐标还是纵坐标取决于分割类型。
+         */
+        int m_offset;
+        /**
+         * @brief 节点的下标，在外部的 leaves 数组中使用。
+         */
+        int m_leafIndex;
+    };
+    /**
+     * @brief 左子节点指针。
+     */
+    struct Node *m_left = nullptr;
+    /**
+     * @brief 右子节点指针。
+     */
+    struct Node *m_right = nullptr;
+};
+Node::~Node()
+{
+    if (!m_left && !m_right) return;
+
+    delete m_left;
+    m_left = nullptr;
+
+    delete m_right;
+    m_right = nullptr;
+}
+```
+
+BSP包含的数据成员如下：
+
+```cpp
+/**
+ * @brief 整棵 BSP 树的根节点。
+ * @todo 后续考虑自己实现简单的对象树机制，不使用智能指针
+ */
+Node *m_root = nullptr;
+
+/**
+ * @brief 存储每个叶子节点中的 PicItem (图元) 列表。
+ * @details 树构建成功以后，所有的 PicItem 都存储在叶子节点的区域中，为了方便获取，将数据提取到整棵树的数据结构中，叶子节点中存储下标方便访问。注意，每个"Vector<PicItem *>"对应一个节点，因此m_leaves实际上以一维的方式组织各个节点。
+ */
+Vector<Vector<PicItem *>> m_leaves;
+
+/**
+ * @brief 树的深度，对应分割的次数。
+ */
+int m_depth = 0;
+
+/**
+ * @brief 整棵树作用的 2D 平面范围。
+ */
+Rect m_region;
+```
+
+
+
+#### 4.2.1.2 树的构造
+
+由用户传入矩形区域region与树的深度depth，程序传入初始根节点并递归调用init函数创建各个子节点。
+
+注：本代码中Rect对象的x1()和y1()返回矩形对象左上角的坐标，x2()和y2()返回矩形对象右下角的坐标，下同。
+
+```cpp
+void init(Node *node, const Rect &region, int depth)
+{
+    // depth > 0 ，继续向下分割
+    if (depth > 0)
+    {
+        // 为了统一命名，使用 left/right 对应逻辑上的 左/右 子节点
+        // 水平 Horizontal ： left 为上半边， right 为下半边
+        // 垂直 Vertical ： left 为左半边， right 为右半边
+        int offsetLeft = 0, offsetRight = 0;
+        Rect leftRect, rightRect;
+        SplitType newSplit;
+
+        if (SplitType::Horizontal == node->m_splitType)
+        {
+            // 当前节点为水平分割 Horizontal ，则子节点为 Vertical ， left 为上半边， right 为下半边
+            newSplit = SplitType::Vertical;
+            leftRect = Rect(region.x1(), region.y1(), region.width(), region.height() / 2);
+            rightRect = Rect(leftRect.x1(), leftRect.y2(), region.width(), region.height() / 2);
+            offsetLeft = leftRect.x1() + leftRect.width() / 2;
+            offsetRight = rightRect.x1() + rightRect.width() / 2;
+        }
+        else
+        {
+            // 当前节点为垂直分割 Vertical ，则子节点为 Horizontal ， left 为左半边， right 为右半边
+            newSplit = SplitType::Horizontal;
+            leftRect = Rect(region.x1(), region.y1(), region.width() / 2, region.height());
+            rightRect = Rect(leftRect.x2(), leftRect.y1(), region.width() / 2, region.height());
+            offsetLeft = leftRect.y1() + leftRect.height() / 2;
+            offsetRight = rightRect.y1() + rightRect.height() / 2;
+        }
+
+        node->m_left = new Node;
+        node->m_left->m_splitType = newSplit;
+        node->m_left->m_offset = offsetLeft;
+
+        node->m_right = new Node;
+        node->m_right->m_splitType = newSplit;
+        node->m_right->m_offset = offsetRight;
+
+        init(node->m_left, leftRect, depth - 1);
+        init(node->m_right, rightRect, depth - 1);
+    }
+    // 遇到叶子节点
+    else
+    {
+        node->m_splitType = SplitType::Leaf;
+        node->m_leafIndex = m_leaves.size();
+        m_leaves.append(Vector<PicItem *>());
+    }
+}
+```
+
+#### 4.2.1.3 树的操作
+
+根据用户传入的区域查询命中的叶节点，并执行操作，这个操作可以是对图元的查询、增删等等。
+
+```cpp
+/**
+ * @brief 定义回调函数类型，用于对叶节点执行操作
+ */
+using Visitor = std::function<void(LList<LCanvasItem *> &)>;
+
+// 以addItem为例
+void addItem(LCanvasItem *item)
+{
+    auto func = [&item](LList<LCanvasItem *> &items)
+    {
+        items.append(item);
+    };
+
+    update(func, m_root, item->boundingRect());
+}
+
+/**
+ * @brief 根据所给的区域查询命中的叶子节点，并执行指定的操作。
+ * @param visitor 函数对象。用于对查找到的叶子节点执行操作
+ * @param node 根节点
+ * @param rect 目标区域矩形
+ */
+void update(const Visitor &visitor, Node *node, const Rect &rect)
+{
+    if (m_leaves.isEmpty()) return;
+
+    switch (node->m_splitType)
+    {
+        case SplitType::Leaf:
+            visitor(m_leaves[node->m_leafIndex]);
+            break;
+
+        case SplitType::Vertical:
+        {
+            if (rect.x1() < node->m_offset)
+            {
+                update(visitor, node->m_left, rect);
+
+                if (rect.x2() >= node->m_offset) update(visitor, node->m_right, rect);
+            }
+            else
+            {
+                update(visitor, node->m_right, rect);
+            }
+
+            break;
+        }
+
+        case SplitType::Horizontal:
+        {
+            if (rect.y1() < node->m_offset)
+            {
+                update(visitor, node->m_left, rect);
+
+                if (rect.y2() >= node->m_offset) update(visitor, node->m_right, rect);
+            }
+            else
+            {
+                update(visitor, node->m_right, rect);
+            }
+
+            break;
+        }
+    }
+}
+```
+
+### 4.2.2 Grid
+
+#### 4.2.2.1 数据结构、数据成员
+
+均匀网格的数据成员如下：
+
+```cpp
+/**
+ * @brief 存储每个网格中的 PicItem 列表。
+ * @details 树构建成功以后，所有的 PicItem 都存储在网格的区域中，为了方便获取，将数据提取到整个网格的数据结构中，通过数学计算得出下标方便访问。注意，每个"Vector<PicItem *>"对应一个网格，因此m_grids实际上以一维的方式组织各个网格。
+ */
+Vector<Vector<PicItem *>> m_grids;
+
+/**
+ * @brief 网格分割出的每边的区间个数。
+ */
+int m_sections = 0;
+
+/**
+ * @brief 整个网格作用的 2D 平面范围。
+ */
+Rect m_region;
+```
+
+#### 4.2.2.2 网格的构造
+
+均匀网格的成员函数通过如下的方式初始化：
+
+```cpp
+/**
+ * @brief 带参构造。
+ * @param region 需要作用的区域
+ * @param splitNum 网格的分割线数量（经纬两个方向分割线数量相同）
+ */
+Grid::Grid(const Rect &region, int splitNum) : m_region(region), m_sections(splitNum + 1), m_grids(Vector<Vector<PicItem *>>((splitNum + 1) * (splitNum + 1))) {}
+```
 
 
 
