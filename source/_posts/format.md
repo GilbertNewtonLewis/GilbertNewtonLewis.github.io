@@ -1,7 +1,7 @@
 ---
 title: LString::format
 date: 2024-07-17 10:46:13
-
+updated: 2024-07-17 10:46:13
 ---
 
 <meta name="referrer" content="no-referrer"/>

@@ -8,7 +8,7 @@
     "build": "npx hexo clean && npx hexo generate && npx gulp"
   },
   "hexo": {
-    "version": "7.3.0"
+    "version": "7.2.0"
   },
   "dependencies": {
     "gulp": "^5.0.0",
@@ -16,7 +16,7 @@
     "gulp-cli": "^3.0.0",
     "gulp-html-minifier-terser": "^7.1.0",
     "gulp-uglify-es": "^3.0.0",
-    "hexo": "^7.1.1",
+    "hexo": "7.2.0",
     "hexo-deployer-git": "^4.0.0",
     "hexo-fs": "^4.1.3",
     "hexo-generator-archive": "^2.0.0",

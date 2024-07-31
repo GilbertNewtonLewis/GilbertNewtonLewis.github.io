@@ -1,6 +1,7 @@
 ---
 title: 一些关于空间数据结构的简单研究与实现
 date: 2024-06-21 18:09:20
+updated: 2024-07-31 19:20:00
 tags: 计算机图形学
 ---
 
@@ -44,13 +45,62 @@ BSP(Binary Space Partitioning，空间二叉划分)也是一种空间数据结�
 
 我们先来看有名的图形界面框架QT。QT中的视图场景QGraphicsScene使用的是轴向划分BSP：
 
-![image-20240711095911491](https://img-blog.csdnimg.cn/direct/ca4e1e87bf0e421bae2ff3c3893f887c.png)
+```cpp
+void QGraphicsSceneBspTree::initialize(const QRectF &rect, int depth, int index)
+{
+    Node *node = &nodes[index];
+    if (index == 0) {
+        node->type = Node::Horizontal;
+        node->offset = rect.center().y();
+    }
+    if (depth) {
+        Node::Type type;
+        QRectF rect1, rect2;
+        qreal offset1, offset2;
+        if (node->type == Node::Horizontal) {
+            type = Node::Vertical;
+            rect1.setRect(ax: rect.left(), ay: rect.top(), aaw: rect.width(), aah: rect.height() / 2);
+            rect2.setRect(ax: rect1.left(), ay: rect1.bottom(), aaw: rect1.width(), aah: rect.height() - rect1.height());
+            offset1 = rect1.center().x();
+            offset2 = rect2.center().x();
+        } else {
+            type = Node::Horizontal;
+            rect1.setRect(ax: rect.left(), ay: rect.top(), aaw: rect.width() / 2, aah: rect.height());
+            rect2.setRect(ax: rect1.right(), ay: rect1.top(), aaw: rect.width() - rect1.width(), aah: rect1.height());
+            offset1 = rect1.center().y();
+            offset2 = rect2.center().y();
+        }
+        int childIndex = firstChildIndex(index);
+        Node *child = &nodes[childIndex];
+        child->offset = offset1;
+        child->type = type;
+        child = &nodes[childIndex + 1];
+        child->offset = offset2;
+        child->type = type;
+        initialize(rect: rect1, depth: depth - 1, index: childIndex);
+        initialize(rect: rect2, depth: depth - 1, index: childIndex + 1);
+    } else {
+        node->type = Node::Leaf;
+        node->leafIndex = leafCnt++;
+    }
+}
+```
 
 nodes数组与index参数用于保存二叉树的信息，如何保存二叉树不是本文探讨的重点。看看这个二叉树是如何生成的：
 
 由用户指定初始的rect和depth，rect参数是矩形对象用于指定BSP所要划分的区域，depth参数用于指定二叉树的深度。二叉树节点Node为如下的数据结构:
 
-![image-20240711104616185](https://img-blog.csdnimg.cn/direct/6378c6d635874a62bdb76ef97fd13b58.png)
+```cpp
+struct Node
+{
+    enum Type { Horizontal, Vertical, Leaf };
+    union {
+        qreal offset;
+        int leafIndex;
+    };
+    Type type;
+};
+```
 
 这里使用了一个非常巧妙的设计：非叶节点对应的是分割线，但是我们并不需要保存“一条线”下来，由于使用轴向划分的BSP，因此一条分割线只需要它的分割方向(水平/竖直)和它距离场景原点坐标轴的距离就可以确定位置，所以非叶节点保存的是type(Horizental/Vertical)以及当前分割线与type对应坐标轴之间的距离offset。叶节点的type是Leaf，它对应一个区域，区域的信息同样不保存在Node本身当中，而是将每个区域中所包含的图元的信息保存在另一个单独的数组leaves中，叶节点的Node保存一个leafIndex作为leaves数组的下标，这样叶节点对应的区域就是leaves[leafIndex]。由于一个节点只可能是叶节点或非叶节点之一，所以使用union联合offset和leafIndex。
 
